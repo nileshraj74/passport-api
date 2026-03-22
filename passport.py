@@ -164,9 +164,7 @@ def api_process():
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
-    import os
-
-    port = int(os.environ.get("PORT", 5000))
+    port = int(os.environ.get("PORT", 10000))  # 👈 IMPORTANT (10000)
 
     print(f"Server running on port {port}")
 
