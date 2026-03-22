@@ -25,9 +25,8 @@ session = new_session("u2net_human_seg")
 
 
 @app.route("/")
-def index():
-    return render_template("index.html")
-
+def home():
+    return "Passport API is running ✅"
 
 # 🎯 Face auto-center
 def auto_center_face(pil_img):
