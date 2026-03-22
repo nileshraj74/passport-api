@@ -25,8 +25,9 @@ session = new_session("u2net_human_seg")
 
 
 @app.route("/")
-def home():
-    return "Passport API is running ✅"
+def index():
+    return render_template("index.html")
+
 
 # 🎯 Face auto-center
 def auto_center_face(pil_img):
@@ -101,6 +102,22 @@ def process_single_image(input_image_bytes):
 
 
 @app.route("/api/process", methods=["POST"])
+def process():
+    try:
+        print("API HIT ✅")
+
+        if 'image' not in request.files:
+            return "No image", 400
+
+        file = request.files['image']
+        print("File received:", file.filename)
+
+        # your existing logic...
+
+    except Exception as e:
+        print("ERROR OCCURRED:", str(e))
+        return str(e), 500
+
 def api_process():
     if "image" not in request.files:
         return jsonify({"error": "No image"}), 400
