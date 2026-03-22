@@ -3,6 +3,7 @@ from flask_cors import CORS
 from PIL import Image, ImageOps, ImageEnhance
 from io import BytesIO
 import os
+import requests
 
 app = Flask(__name__)
 CORS(app)
@@ -13,19 +14,19 @@ def home():
     return "Passport API is running ✅"
 
 
-# 🎯 Simple image processing (NO rembg)
-def process_single_image(input_bytes):
-    img = Image.open(BytesIO(input_bytes)).convert("RGB")
+# 🎯 Background removal using remove.bg API
+def remove_background_api(file):
+    response = requests.post(
+        "https://api.remove.bg/v1.0/removebg",
+        files={"image_file": file},
+        data={"size": "auto"},
+        headers={"X-Api-Key": "YOUR_API_KEY"},  # 👈 PUT YOUR API KEY HERE
+    )
 
-    # Padding
-    padding = int(max(img.size) * 0.1)
-    img = ImageOps.expand(img, border=padding, fill=(255, 255, 255))
+    if response.status_code != 200:
+        raise Exception(f"Remove.bg error: {response.text}")
 
-    # Enhance
-    img = ImageEnhance.Sharpness(img).enhance(1.2)
-    img = ImageEnhance.Brightness(img).enhance(1.05)
-
-    return img
+    return Image.open(BytesIO(response.content)).convert("RGB")
 
 
 # ✅ MAIN API
@@ -42,12 +43,20 @@ def process():
 
         copies = int(request.form.get("copies", 6))
 
-        # Process image
-        img = process_single_image(file.read())
+        # ✨ Background removal
+        img = remove_background_api(file)
 
+        # Padding
+        padding = int(max(img.size) * 0.1)
+        img = ImageOps.expand(img, border=padding, fill=(255, 255, 255))
+
+        # Enhance
+        img = ImageEnhance.Sharpness(img).enhance(1.2)
+        img = ImageEnhance.Brightness(img).enhance(1.05)
+
+        # Resize passport size
         passport_width = 413
         passport_height = 531
-
         img = img.resize((passport_width, passport_height), Image.LANCZOS)
 
         # 🧾 A4 layout
@@ -100,7 +109,7 @@ def process():
         return str(e), 500
 
 
-# ✅ Run app
+# ✅ Run app (Railway compatible)
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
     print(f"Server running on port {port}")
