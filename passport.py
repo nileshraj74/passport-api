@@ -20,7 +20,7 @@ def remove_background_api(file):
         "https://api.remove.bg/v1.0/removebg",
         files={"image_file": file},
         data={"size": "auto"},
-        headers={"X-Api-Key": "YOUR_API_KEY"},
+        headers={"X-Api-Key": "E7BDdkHYs8sRezD5tKHBQB1n"},
     )
 
     if response.status_code != 200:
