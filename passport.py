@@ -20,13 +20,23 @@ def remove_background_api(file):
         "https://api.remove.bg/v1.0/removebg",
         files={"image_file": file},
         data={"size": "auto"},
-        headers={"X-Api-Key": "E7BDdkHYs8sRezD5tKHBQB1n"},  # 👈 PUT YOUR API KEY HERE
+        headers={"X-Api-Key": "YOUR_API_KEY"},
     )
 
     if response.status_code != 200:
         raise Exception(f"Remove.bg error: {response.text}")
 
-    return Image.open(BytesIO(response.content)).convert("RGB")
+    img = Image.open(BytesIO(response.content))
+
+    # ✅ Convert transparent background to white
+    if img.mode == "RGBA":
+        white_bg = Image.new("RGB", img.size, (255, 255, 255))
+        white_bg.paste(img, mask=img.split()[3])  # alpha channel
+        img = white_bg
+    else:
+        img = img.convert("RGB")
+
+    return img
 
 
 # ✅ MAIN API
